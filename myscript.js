@@ -1,7 +1,5 @@
 
 // This is to include today's date using moments.js
-
-
 const m = moment();
 
 console.log(m.format("ddd MMMM Mo YYYY"));
@@ -9,6 +7,8 @@ console.log(m.format("[Yeah the day is] dddd [and we're in] YYYY"));
 
 var dt = new Date();
 document.getElementById("currentDay").innerHTML = dt.toLocaleString();
+
+
 
 //This is the calender function 
 function settingDate(date, day) {
@@ -48,11 +48,12 @@ function getDatesBetween(date1, date2) {
         { shortDay: "Sat", fullDay: "Saturday" },
         { shortDay: "Sun", fullDay: "Sunday" }
     ];
+    let LastDate, firstDate;
     for (let i = 0; i < dates.length; i++) {
         LastDate = dates[i];
         firstDate = new Date(dates[i].getFullYear(), dates[i].getMonth(), 1)
         //creating the calender and its items dynamically by calling html tags
-        content += "div id=`calenderTable`" + (i + 1) + "`>";
+        content += "div id='calenderTable_" + (i + 1) + "'>";
         //getting the date and year by splitting the previous string and calling item using the index, 0 is the day.
         content += "<h2>" + firstDate.toString().split(" ")[1] + "-" + firstDate.getFullYear() + "</h2>";
         content += "<table>";
@@ -66,19 +67,27 @@ function getDatesBetween(date1, date2) {
         let j = 1;
         let displayNum, idMonth;
         //this is to render days of week
-        while(j<=LastDate.getDate()){
+        while (j <= LastDate.getDate()) {
             content += "<tr>";
-            for(let k=0; k<7;k++){
-displayNum=j<10?"0"+ j : j;
-if (j== 1){
-   if(firstDate.toString().split(" ")[0]== weekDays[k].shortDay){
-       
-   } 
-}
+            for (let k = 0; k < 7; k++) {
+                displayNum = j < 10 ? "0" + j : j;
+                if (j == 1) {
+                    if (firstDate.toString().split(" ")[0] == weekDays[k].shortDay) {
+
+                        content += "<td>"; displayNum + "</td>";
+                        j++;
+                    } else {
+                        content += "</td></td>";
+                    }
+                } else if (j > LastDate.getDate()) {
+                    content += "<td></td>";
+                } else {
+                    content += "<td>"; displayNum + "</td>";
+                    j++;
+                }
             }
             content += "</tr>";
         }
-
         content += "</tbody>";
         content += "</table>";
         content += "</div>";
@@ -87,4 +96,4 @@ if (j== 1){
 }
 //FOR ADRIANA TO REMEBER this below is a string
 let content = getDatesBetween("2020/01/01", "2021/01/01");
-document.getElementById("Timeblocks").innerHTML = content;
+document.getElementById("calender").innerHTML = content;
