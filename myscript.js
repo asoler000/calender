@@ -8,92 +8,62 @@ console.log(m.format("[Yeah the day is] dddd [and we're in] YYYY"));
 var dt = new Date();
 document.getElementById("currentDay").innerHTML = dt.toLocaleString();
 
+var idsCollection = ["#9", "#10", "#11", "#12", "#1", "#2", "#3", "#4",  "#5"];
+var timeSlotCollection = ["09:00:00", "10:00:00", "11:00:00", "12:00:00", "13:00:00",  "14:00:00",  "15:00:00",  "16:00:00",  "17:00:00"];
+var shiftedTimeSlotCollection = ["10:00:00", "11:00:00", "12:00:00", "13:00:00",  "14:00:00",  "15:00:00",  "16:00:00",  "17:00:00",  "18:00:00"];
 
+var  plannerContent = [];
+var getLocalStorageData = JSON.parse(localStorage.getItem("planner-items"));
 
-//This is the calender function 
-function settingDate(date, day) {
-    date = new Date(date);
-    date.setdate(day);
-    date.setHours(23);
+if (getLocalStorageData !== null) {
+ plannerContent = getLocalStorageData;
 }
-function getDatesBetween(date1, date2) {
-    //FOR ADRIANA THIS BELOW IS CONVERTING THE STRINGS TO date OBJECTS
-    let range1 = new Date(date1);
-    let range2 = Date(date2);
-    date1 = settingDate(date1, 31);
-    date2 = settingDate(date2, 31);
-    let temp;
-    let dates = [];
-    // write a loop for the end of dates and months
-    while (date1 <= date2) {
-        //this one below is for April and February since there is not 31 days
-        if (date1.getDate() != 31) {
-            temp = settingDate(date1, 0);
-            if (temp >= range1 && temp <= range2) dates.push(temp);
-            date1 = settingDate(date1, 31);
-        } else {
-            temp = new Date(date1);
-            if (temp >= range1 && temp < +range2) dates.push(temp);
-            date1.setMonth(date1.getMonth() + 1);
-        }
-    }
-    let content = "";
-    //weekday objects
-    let weekDays = [
-        { shortDay: "Mon", fullDay: "Monday" },
-        { shortDay: "Tue", fullDay: "Tuesday" },
-        { shortDay: "Wed", fullDay: "Wednesday" },
-        { shortDay: "Thur", fullDay: "Thursday" },
-        { shortDay: "Fri", fullDay: "Friday" },
-        { shortDay: "Sat", fullDay: "Saturday" },
-        { shortDay: "Sun", fullDay: "Sunday" }
-    ];
-    let LastDate, firstDate;
-    for (let i = 0; i < dates.length; i++) {
-        LastDate = dates[i];
-        firstDate = new Date(dates[i].getFullYear(), dates[i].getMonth(), 1)
-        //creating the calender and its items dynamically by calling html tags
-        content += "div id='calenderTable_" + (i + 1) + "'>";
-        //getting the date and year by splitting the previous string and calling item using the index, 0 is the day.
-        content += "<h2>" + firstDate.toString().split(" ")[1] + "-" + firstDate.getFullYear() + "</h2>";
-        content += "<table>";
-        content += "<thead>";
-        weekDays.map(item => {
-            content += "<th>" + item.fullDay + "</th>";
 
-        })
-        content += "</thead>";
-        content += "<tbody>";
-        let j = 1;
-        let displayNum, idMonth;
-        //this is to render days of week
-        while (j <= LastDate.getDate()) {
-            content += "<tr>";
-            for (let k = 0; k < 7; k++) {
-                displayNum = j < 10 ? "0" + j : j;
-                if (j == 1) {
-                    if (firstDate.toString().split(" ")[0] == weekDays[k].shortDay) {
+for (var i=0;i<idsCollection.length; i++) {
+  var descriptionEl = $(idsCollection[i]);
+  var buttonEl = descriptionEl.parent().parent().find("button");
 
-                        content += "<td>"; displayNum + "</td>";
-                        j++;
-                    } else {
-                        content += "</td></td>";
-                    }
-                } else if (j > LastDate.getDate()) {
-                    content += "<td></td>";
-                } else {
-                    content += "<td>"; displayNum + "</td>";
-                    j++;
-                }
-            }
-            content += "</tr>";
-        }
-        content += "</tbody>";
-        content += "</table>";
-        content += "</div>";
-    }
-    return content;
+  if ((moment().format('MMMM Do YYYY, HH:mm:ss')) < (moment().format('MMMM Do YYYY') +  ", " + timeSlotCollection[i])) { 
+    descriptionEl.attr("class", "future");
+    plannerContent.forEach(function(item) {
+      if (idsCollection[i] === ("#" + (item["input-id"]))) {
+        descriptionEl.val(item["input-value"]);
+      }
+    });
+  }
+  else if (((moment().format('MMMM Do YYYY, HH:mm:ss')) >= (moment().format('MMMM Do YYYY') +  ", " + timeSlotCollection[i])) &&  
+          ((moment().format('MMMM Do YYYY, HH:mm:ss')) < (moment().format('MMMM Do YYYY') +  ", " + shiftedTimeSlotCollection[i])))
+  {
+    descriptionEl.attr("class", "present");
+    $(".present").attr("disabled", "disabled");
+    buttonEl.attr("disabled", true);
+    plannerContent.forEach(function(item) {
+      if (idsCollection[i] === ("#" + item["input-id"])) {
+        descriptionEl.val(item["input-value"]);
+      }
+    });
+  }
+  else if ((moment().format('MMMM Do YYYY, HH:mm:ss')) > (moment().format('MMMM Do YYYY') +  ", " + timeSlotCollection[i])) {
+    descriptionEl.attr("class", "past");
+    $(".past").attr("disabled", "disabled");
+    buttonEl.attr("disabled", true);
+  }
 }
+
+$("button").on("click", function() {
+  event.preventDefault();
+  var container = $(this).parent().parent();  
+  var inputValue = container.find("input").val();
+  var inputId = container.find("input").attr("id");
+  var textObj = {
+    "input-id": inputId,
+    "input-value": inputValue };
+  
+  if (textObj["input-value"] !== "") {
+    plannerContent.push(textObj);
+    localStorage.setItem("planner-items", JSON.stringify(plannerContent));
+  }
+});
 //FOR ADRIANA TO REMEBER this below is a string
 let content = getDatesBetween("2020/01/01", "2021/01/01");
 document.getElementById("calender").innerHTML = content;
